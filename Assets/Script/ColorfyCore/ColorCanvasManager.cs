@@ -4,7 +4,7 @@ using System.Collections;
 
 public class ColorCanvasManager
 {
-    Color[]     color_cache;
+    Color32[]     color_cache;
     int         width;
     int         height;
 
@@ -18,7 +18,7 @@ public class ColorCanvasManager
     public void LoadColorTemplate(string path)
     {
         Texture2D source_image = Resources.Load<Texture2D>(path);
-        color_cache = source_image.GetPixels();
+        color_cache = source_image.GetPixels32();
         width = source_image.width;
         height = source_image.height;
 
@@ -31,22 +31,50 @@ public class ColorCanvasManager
         RefreshUI();
 
         // 释放图片资源
+
+        ColorfyRegion(512, 300, new Color32(255, 0, 0, 255), new Color32(0, 0, 0, 255));
+
+        RefreshUI();
     }
 
     // 刷新内存到UI的显示上
     public void RefreshUI()
     {
         Texture2D new_texture = new Texture2D(width, height);
-        new_texture.SetPixels(color_cache);
+        new_texture.SetPixels32(color_cache);
         new_texture.Apply();
         
         canvas_texture.mainTexture = new_texture;
     }
 
     // x, y 为像素的坐标，屏幕点击的坐标由用户输入相关的模块去处理转换成像素的坐标
-	public void ColorfyRegion(int x, int y, Color front_color, Color back_color)
+	public void ColorfyRegion(int x, int y, Color32 front_color, Color32 back_color)
     {
+        if(x < 0 || x >= width || y < 0 || y >= height)
+        {
+            return;
+        }
 
+        int color_index = x + y * width;
+
+        Color32 current_color = color_cache[color_index];
+
+        if((current_color.r != front_color.r ||
+            current_color.g != front_color.g ||
+            current_color.b != front_color.b ) && 
+            current_color.r >125 && current_color.g > 125 && current_color.b > 125)
+        {
+            color_cache[color_index] = front_color;
+
+            ColorfyRegion(x-1, y, front_color, back_color);
+            ColorfyRegion(x+1, y, front_color, back_color);
+            ColorfyRegion(x, y-1, front_color, back_color);
+            ColorfyRegion(x, y+1, front_color, back_color);
+        }
+        else
+        {
+            // Debug.Log(current_color);
+        }
     }
 
     // 点击画布的处理, 传入的是屏幕坐标
