@@ -13,7 +13,6 @@ public class StartUp : MonoBehaviour
 	// 游戏主循环
 	void Update()
 	{
-		App.OnUpdate ();
 	}
 
 	void LateUpdate()
@@ -23,15 +22,11 @@ public class StartUp : MonoBehaviour
 
 	void OnApplicationFocus(bool focus)
 	{
-		Debug.Log("OnApplicationFocus " + focus.ToString());
-
 		App.OnApplicationPause(!focus);
 	}
 
 	void OnApplicationPause(bool ispause) 
 	{
-		Debug.Log("OnApplicationPause " + ispause.ToString());
-
 		App.OnApplicationPause(ispause);
 	}
 
