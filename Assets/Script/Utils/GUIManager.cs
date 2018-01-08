@@ -78,8 +78,8 @@ public class GUIManager
 	{
 		Vector3 ui_position = Vector3.zero;
 
-		ui_position.x = ui_root_componet_.manualWidth * screen_pos.x / Camera.main.pixelWidth;
-		ui_position.y = ui_root_componet_.activeHeight * screen_pos.y / Camera.main.pixelHeight;
+		ui_position.x = ui_root_componet_.manualWidth * screen_pos.x / Camera.main.pixelWidth - ui_root_componet_.manualWidth/2;
+		ui_position.y = ui_root_componet_.activeHeight * screen_pos.y / Camera.main.pixelHeight - ui_root_componet_.activeHeight/2;
 	
 		return ui_position;
 	}

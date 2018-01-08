@@ -18,10 +18,17 @@ public static class App
 
 		ColorCanvasManager canvas = new ColorCanvasManager();
 
+		canvas.Init();
+		
 		canvas.LoadColorTemplate("flower");
 	}
 
 	public static void LateUpdate(){ }
+
+	public static void Update()
+	{
+		InputManager.Instance().Tick(Time.deltaTime);
+	}
 
 	public static void OnApplicationFocus(bool focus){ }
 

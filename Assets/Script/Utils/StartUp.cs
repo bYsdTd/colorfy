@@ -13,6 +13,7 @@ public class StartUp : MonoBehaviour
 	// 游戏主循环
 	void Update()
 	{
+		App.Update();
 	}
 
 	void LateUpdate()

@@ -14,6 +14,16 @@ public class ColorCanvasManager
 
     GameObject  canvas_template;
 
+    public void Init()
+    {
+        EventManager.Instance().RegisterEvent(EventConfig.EVENT_SCENE_CLICK_DOWN, OnClickScreenPositon);
+    }
+
+    public void Destroy()
+    {
+
+    }
+
     // 从模板加载原始的图片，或者是已经涂了色的图
     public void LoadColorTemplate(string path)
     {
@@ -30,17 +40,7 @@ public class ColorCanvasManager
 
         RefreshUI();
 
-        // 释放图片资源
-
-        ColorfyRegion(50, height - 20, Color.red);
-
-        // float H;
-        // float V;
-        // float S;
-
-        // Color.RGBToHSV(Color.black, out H, out S, out V);
-
-        RefreshUI();
+        // todo 释放图片资源
     }
 
     // 刷新内存到UI的显示上
@@ -125,6 +125,8 @@ public class ColorCanvasManager
                 }
             }
         }
+
+        RefreshUI();
     }
 
     // 判断填充颜色的边界函数
@@ -152,9 +154,28 @@ public class ColorCanvasManager
     }
 
     // 点击画布的处理, 传入的是屏幕坐标
-    public void OnClickScreenPositon(int x, int y)
+    public void OnClickScreenPositon(params System.Object[] all_params)
     {
+        Vector2 screen_pos = (Vector2)all_params[0];
 
+        Vector3 ui_position = GUIManager.Instance().ScreenPosToUIPos(new Vector3(screen_pos.x, screen_pos.y, 0));
+
+        Vector2 current_left_bottom = new Vector2(-canvas_texture.width/2, -canvas_texture.height/2);
+
+        Vector2 current_top_right = new Vector2(canvas_texture.width/2, canvas_texture.height/2);
+
+        Vector2 click_pos = new Vector2(ui_position.x, ui_position.y);
+
+        if(click_pos.x >= current_left_bottom.x
+            && click_pos.x <= current_top_right.x
+            && click_pos.y >= current_left_bottom.y
+            && click_pos.y <= current_top_right.y)
+        {
+            int x = (int)((click_pos.x - current_left_bottom.x) * width / canvas_texture.width);
+            int y = (int)((click_pos.y - current_left_bottom.y) * height / canvas_texture.height);
+
+            ColorfyRegion(x, y, Color.red);
+        }
     }
 
     //
