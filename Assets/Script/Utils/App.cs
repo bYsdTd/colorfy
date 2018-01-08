@@ -18,7 +18,7 @@ public static class App
 
 		ColorCanvasManager canvas = new ColorCanvasManager();
 
-		canvas.LoadColorTemplate("colorfy");
+		canvas.LoadColorTemplate("flower");
 	}
 
 	public static void LateUpdate(){ }
