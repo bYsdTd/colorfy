@@ -1,8 +1,9 @@
 using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 
-public class ColorCanvasManager
+public class ColorCanvasManager : MonoBehaviour
 {
     Color[]     color_cache;
     int         width;
@@ -14,14 +15,30 @@ public class ColorCanvasManager
 
     GameObject  canvas_template;
 
+    bool        is_coloring;
+
+    int         timer_id;
+    
+    /// <summary>
+    /// Start is called on the frame when a script is enabled just before
+    /// any of the Update methods is called the first time.
+    /// </summary>
+    void Start()
+    {    
+		Init();
+		
+		LoadColorTemplate("flower");
+    }
+
     public void Init()
     {
+        
         EventManager.Instance().RegisterEvent(EventConfig.EVENT_SCENE_CLICK_DOWN, OnClickScreenPositon);
     }
 
     public void Destroy()
     {
-
+        EventManager.Instance().UnRegisterEvent(EventConfig.EVENT_SCENE_CLICK_DOWN, OnClickScreenPositon);
     }
 
     // 从模板加载原始的图片，或者是已经涂了色的图
@@ -41,6 +58,9 @@ public class ColorCanvasManager
         RefreshUI();
 
         // todo 释放图片资源
+
+        is_coloring = false;
+        timer_id = -1;
     }
 
     // 刷新内存到UI的显示上
@@ -53,43 +73,47 @@ public class ColorCanvasManager
         canvas_texture.mainTexture = new_texture;
     }
 
+    // struct ColorThreadParam
+    // {
+    //     public int x;
+    //     public int y;
+    //     public Color front_color;
+
+    //     public ColorThreadParam(int x, int y, Color front_color)
+    //     {
+    //         this.x = x;
+    //         this.y = y;
+    //         this.front_color = front_color;
+    //     }
+    // }
+
+    // void ColorfyThread(object param)
+    // {
+    //     ColorThreadParam colorfy_param = (ColorThreadParam)param;
+    //     ColorfyRegion(colorfy_param.x, colorfy_param.y, colorfy_param.front_color);
+
+    //     is_coloring = false;
+    // }
+
     // x, y 为像素的坐标，屏幕点击的坐标由用户输入相关的模块去处理转换成像素的坐标
-	public void ColorfyRegion(int x, int y, Color front_color)
+	IEnumerator ColorfyRegion(int x, int y, Color front_color)
     {
-        // if(x < 0 || x >= width || y < 0 || y >= height)
-        // {
-        //     return;
-        // }
+        Queue<Vector2i>  open_list = new Queue<Vector2i>();
+        HashSet<Vector2i> close_list = new HashSet<Vector2i>();
 
-        // int color_index = x + y * width;
-
-        // Color current_color = color_cache[color_index];
-
-        // if(current_color == Color.white)
-        // {
-        //     color_cache[color_index] = front_color;
-
-        //     ColorfyRegion(x-1, y, front_color);
-        //     ColorfyRegion(x, y-1, front_color);
-        //     ColorfyRegion(x+1, y, front_color);
-        //     ColorfyRegion(x, y+1, front_color);
-        // }
-        // else
-        // {
-        //     // Debug.Log(current_color);
-
-        //     return;
-        // }
+        Vector2i[] neighbor = new Vector2i[4];
 
         if(x < 0 || x >= width || y < 0 || y >= height)
         {
-            return;
+            yield break;
         }
 
-        Queue<Vector2i>  open_list = new Queue<Vector2i>();
-        HashSet<Vector2i> close_list = new HashSet<Vector2i>();
+        open_list.Clear();
+        close_list.Clear();
         
         open_list.Enqueue(new Vector2i(x, y));
+        
+        int time_stamp = System.Environment.TickCount;
 
         while(open_list.Count > 0)
         {
@@ -109,8 +133,6 @@ public class ColorCanvasManager
             color_cache[color_index] = front_color;
 
             // 周围的加入队列
-            Vector2i[] neighbor = new Vector2i[4];
-            
             neighbor[0] = new Vector2i(current_node.x-1, current_node.y);
             neighbor[1] = new Vector2i(current_node.x, current_node.y+1);
             neighbor[2] = new Vector2i(current_node.x+1, current_node.y);
@@ -123,6 +145,15 @@ public class ColorCanvasManager
                 {
                     open_list.Enqueue(node);
                 }
+            }
+
+            int elapsed = System.Environment.TickCount - time_stamp;
+
+            if(elapsed > 1000)
+            {
+                RefreshUI();
+                time_stamp = System.Environment.TickCount;
+                yield return new WaitForSeconds(1.0f);
             }
         }
 
@@ -174,9 +205,40 @@ public class ColorCanvasManager
             int x = (int)((click_pos.x - current_left_bottom.x) * width / canvas_texture.width);
             int y = (int)((click_pos.y - current_left_bottom.y) * height / canvas_texture.height);
 
-            ColorfyRegion(x, y, Color.red);
+            //ColorfyRegion(x, y, Color.red);
+
+            // if(!is_coloring)
+            // {
+            //     is_coloring = true;
+
+            //     Thread color_thread = new Thread(ColorfyThread);
+            //     color_thread.IsBackground = true;
+            //     color_thread.Priority = System.Threading.ThreadPriority.Lowest;
+            //     color_thread.Start(new ColorThreadParam(x, y, Color.red));
+            //     timer_id = TimerManager.Instance().RepeatCallFunc(delegate (float dt){
+                    
+            //         RefreshUI();
+
+            //     }, 1);
+
+            // }
+
+            StartCoroutine(ColorfyRegion(x, y, Color.red));
         }
     }
+
+    // public void Update(float delta_time) 
+    // {
+    //     Debug.Log("M");
+    //     if(!is_coloring && timer_id > 0)
+    //     {
+    //         TimerManager.Instance().DestroyTimer(timer_id);
+
+    //         timer_id = -1;
+
+    //         RefreshUI();
+    //     }
+    // }
 
     //
     public void OnDragStart()

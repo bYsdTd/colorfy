@@ -15,12 +15,6 @@ public static class App
 		SoundManager.Instance ().Init ();
 
 		inited = true;
-
-		ColorCanvasManager canvas = new ColorCanvasManager();
-
-		canvas.Init();
-		
-		canvas.LoadColorTemplate("flower");
 	}
 
 	public static void LateUpdate(){ }
@@ -48,7 +42,7 @@ public static class App
 	public static void DoCleanUp()
 	{
 		inited = false;
-		
+
 		GUIManager.Instance().Destroy();
 	}
 }
