@@ -28,28 +28,6 @@ public partial class ColorCanvasManager : MonoBehaviour
 		Init();
 		
 		LoadColorTemplate("flower");
-
-        int i = 0;
-        TestRecursion(ref i);
-
-        Debug.Log(i);
-    }
-
-    void TestRecursion(ref int i)
-    {
-        int temp = 0;
-        int temp1 = 1;
-        temp += temp1;
-
-        if(i < 10000)
-        {
-            ++i;
-            TestRecursion(ref i);
-        }
-        else
-        {
-            return;
-        }
     }
 
     public void Init()

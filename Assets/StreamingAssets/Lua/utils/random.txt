@@ -1,0 +1,31 @@
+-- 随机数生成
+random = {};
+
+function random.seed( seed )
+	random.gen1 = 1664525;
+	random.gen2 = 1013904223;
+	random.randomseed = seed;
+	random.max = 4294967296;
+end
+
+function random.r()
+	local newseed = random.gen1 * random.randomseed + random.gen2;
+	newseed = math.fmod(newseed, random.max);
+	random.randomseed = newseed;
+	return random.randomseed;
+end
+
+function random.rand(m, n)
+	local r = random.r();
+	if m then
+		if n then
+			return math.fmod(r, n - m + 1) + m;
+		else
+			return math.fmod(r, m) + 1;
+		end
+	else
+		return r / random.max;
+	end
+end
+
+return random

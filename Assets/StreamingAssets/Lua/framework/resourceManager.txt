@@ -1,0 +1,20 @@
+-- 资源加载类现在调用的是c#的资源加载
+resourceManager = singletonClass("layoutManager")
+
+function resourceManager:ctor()
+end
+
+-- 加载资源
+function resourceManager.load(name, isUI, successCallback, failedCallback)
+	LuaResMananger.LoadGameObject(name, isUI, successCallback, failedCallback)
+end
+
+-- 卸载资源
+function resourceManager.unload(name, gameobj, isUI)
+	LuaResMananger.UnloadGameObject(name, gameobj, isUI)
+end
+
+-- 销毁 对象
+function resourceManager.unloadGameobject(gameobj)
+	UnityEngine.GameObject.Destroy(gameobj)
+end

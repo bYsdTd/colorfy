@@ -1,0 +1,77 @@
+-- 玩家的登录流程都在这
+statusLogin = singletonClass("statusLogin")
+
+statusLogin.Stage = {
+    None = 0,
+    Init = 1,
+    ConnectServer = 2,
+    UserLogin = 9,
+}
+
+function statusLogin:ctor()
+    self.stage_ = statusLogin.Stage.None
+end 
+
+function statusLogin:EnterStage(newStage, data)
+    if self.stage_ == newStage then
+        print("statusLogin 已经在此阶段 " .. newStage)
+        return 
+    end 
+    self.stage_ = newStage
+
+    if newStage == statusLogin.Stage.Init then 
+        self:Init( )
+    elseif newStage == statusLogin.Stage.ConnectServer then 
+        self:ConnectServer( )
+    elseif newStage == statusLogin.Stage.UserLogin then 
+        self:UserLogin(data)
+    end 
+end
+
+function statusLogin:Init( )
+    eventManager.addEventLister(event_define.ConnectSuccess, self.OnConnectSuccess)
+    eventManager.addEventLister(event_define.ConnectFailed, self.OnConnectFailed)
+    eventManager.addEventLister(event_define.ConnectLost, self.OnConnectLost)
+    eventManager.addEventLister(event_define.LoginComplete, self.OnLoginComplete)
+
+    self:EnterStage(statusLogin.Stage.ConnectServer)
+end
+
+-- 连接服务器
+function statusLogin:ConnectServer( )
+    local ip = loginDataManager:Instance():GetServerIp( )
+    LuaEventManager.PostCSEvent("ConnectServer", ip, 3000)
+end
+
+function statusLogin.OnConnectSuccess( )
+    statusLogin:Instance():EnterStage(statusLogin.Stage.UserLogin, nil)
+end
+
+function statusLogin.OnConnectFailed( )
+    print("连结失败")
+end
+
+function statusLogin.OnConnectLost( )
+    print("连结丢失")
+end
+
+-- 玩家登录
+function statusLogin:UserLogin(realm)
+    local rq = networkManager:Instance():CreteRequestData()
+    rq.mobileId = LuaUtils.GetDeviceID()
+    print(rq.mobileId)
+    local succCallback = function ( )
+        print("玩家登录成功")
+        gameMain:Instance():LoginCompleteAndPlayGame()
+    end
+    local failCallback = function ( )
+        print("玩家登录失败")
+    end
+    networkManager:Instance():SendProto(RequestId.H_POST_LOGIN, rq.rqData.seqNum, "proto_structs.RqLogin", rq, true, succCallback, failCallback)
+end
+
+-- 登陆成功的回调
+function statusLogin.OnLoginComplete( )
+    -- print("玩家登录成功")
+    gameMain:Instance():LoginCompleteAndPlayGame()
+end

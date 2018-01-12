@@ -1,0 +1,9 @@
+event_define = {};
+
+-- 登录相关###################################################
+event_define["ConnectSuccess"] = "ConnectSuccess" -- 连接服务器成功了
+event_define["ConnectFailed"] = "ConnectFailed" -- 连接服务器失败了
+event_define["ConnectLost"] = "ConnectLost" -- 连接服务器丢失了
+event_define["LoginComplete"] = "LoginComplete" -- 登录成功
+-- ###################################################
+event_define["UpdateBattleLoading"] = "UpdateBattleLoading" -- 登录成功

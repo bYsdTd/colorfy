@@ -1,0 +1,49 @@
+local battleLoadingLayout = class("battleLoadingLayout", layout) 
+
+-- 一些定义
+event_define.BattleLoadingLayout_SHOW = "BattleLoadingLayout_SHOW"
+
+function battleLoadingLayout:ctor( id )
+	battleLoadingLayout.super.ctor(self,id)	
+
+    self:addEvent({ name = event_define.BattleLoadingLayout_SHOW, eventHandler = battleLoadingLayout.super.Show})
+    self:addEvent({ name = event_define.UpdateBattleLoading, eventHandler = self.UpdateLoadingProgress})
+end	
+
+function battleLoadingLayout:OnInit(event)
+     -- 获得UI对象
+    self.progress_load_ = self:ChildGameObject("Content/ButtonFrame/ProgressBar"):GetComponent(UIProgressBar) -- 进度条
+    self.lbl_tip_ = self:ChildGameObject("Content/ButtonFrame/Tip"):GetComponent(UILabel)
+end
+
+function battleLoadingLayout:OnShow(event)
+    local selfRef = self
+    LuaUtils.SwitchToLevel(sceneManager.SceneId.scn_battle)
+end
+
+function battleLoadingLayout:OnHide(event)
+end
+
+function battleLoadingLayout:OnDestory( )
+end
+
+function battleLoadingLayout:UpdateLoadingProgress(event)
+    print("UpdateLoadingProgress")
+
+    local progress = event.progress
+    self.progress_load_.value = progress / 100
+    if progress == 100 then
+        self.lbl_tip_.text = "等待其他玩家......"
+    end
+
+    if progress == 100 then 
+        -- 加入房间， 发送加载完成的请求
+        local info = findBattleDataManager:Instance():GetMatchingRoomInfo( )
+
+        local ip = loginDataManager:Instance():GetServerIp( )
+        LuaEventManager.PostCSEvent("JoinRoom", ip, info.serverAddr, info.roomNo, info.token)
+        LuaEventManager.PostCSEvent("BattleLoadFinish")
+    end 
+end
+
+return battleLoadingLayout

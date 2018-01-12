@@ -1,0 +1,204 @@
+-- Lua层的网络管理
+networkManager = singletonClass("networkManager")
+-- 加载依赖文件
+require("network.autogen.requestId")
+require("network.autogen.responseId")
+require("network.protobuf")
+require("network.parser")
+require("network.autogen.registerPb")
+require("network.registerHandler")
+
+local MaxTimeout = 10 -- 超时时间 10S
+
+-- ##############初始化部分开始##############
+function networkManager:ctor( )
+	print("networkManager ctor")
+
+	eventManager.addEventLister(event_define.ConnectSuccess, self.OnConnectSuccess, self)
+    eventManager.addEventLister(event_define.ConnectLost, self.OnConnectLost, self)
+
+	self:registerPb()
+	self:registerHandler()
+	-- 数据
+	self.seqnum_ = 10
+	self.success_callbacks_ = {} -- 保存SuccessCallBack （key是seqNum）
+	self.fail_callbacks_ = {} -- 保存FailCallBack（key是seqNum）
+	self.timeout_counter_ = {} -- 用于超时检测
+	self.mask_quest = {} -- 用于保存需要显示遮罩的请求(只存seqNum)
+
+	self.checktimeout_timer_id_ = timerManager:Instance():RepeatCallFunc(self, self.CheckTimeout, 1) -- 检测超时的Timer id
+	self.heartbeat_timer_id_ = -1
+end
+-- ##############初始化部分结束##############
+
+function networkManager:destroy()
+	if self.heartbeat_timer_id_ > 0 then
+		timerManager:Instance():DestoryTimer(self.heartbeat_timer_id_)
+		self.heartbeat_timer_id_ = -1 
+	end 
+	timerManager:Instance():DestoryTimer(self.checktimeout_timer_id_)
+	self.checktimeout_timer_id_ = nil
+	self.seqnum_ = nil
+	self.success_callbacks_ = nil
+	self.fail_callbacks_ = nil
+	self.timeout_counter_ = nil
+end
+
+function networkManager:registerProto(filename)
+	local buffer = LuaUtils.ReadFileAsByteArray(filename)
+	protobuf.register(buffer:ReadString())
+end
+
+function networkManager:GetSeqNum( )
+	self.seqnum_ = self.seqnum_ + 1
+	return self.seqnum_
+end
+
+function networkManager:ClearCallBacks(seqNum)
+	if self.success_callbacks_[seqNum] ~= nil then
+		self.success_callbacks_[seqNum] = nil
+	end 
+	if self.fail_callbacks_[seqNum] ~= nil then
+		self.fail_callbacks_[seqNum] = nil
+	end 
+end
+
+function networkManager:ClearTimeoutCounter(seqNum)
+	self.timeout_counter_[seqNum] = nil
+end
+
+function networkManager:CheckTimeout()
+	local timeoutIds = {}
+	for k, v in pairs(self.timeout_counter_) do
+		self.timeout_counter_[k] = v + 1
+		if self.timeout_counter_[k] > MaxTimeout then 
+			timeoutIds[#timeoutIds + 1] = k
+		end 
+	end
+		
+	if #timeoutIds > 0 then 
+		for i, v in ipairs(timeoutIds) do
+			if self.fail_callbacks_[v] ~= nil then
+				self.fail_callbacks_[v]() 
+			end 
+			self:ClearCallBacks(v)
+			self:ClearTimeoutCounter(v)
+		end
+		print("请求超时了")
+	end 
+end 
+
+function networkManager:ClearMaskQuest( )
+	self.mask_quest = {}
+	layoutManager:Instance():SetNetWorkMaskState(false)
+end
+
+function networkManager:OnConnectSuccess( )
+	self.heartbeat_timer_id_ = timerManager:Instance():RepeatCallFunc(self, self.NetWorkHeartBeat, 60)
+end
+
+function networkManager:OnConnectLost( )
+	timerManager:Instance():DestoryTimer(self.heartbeat_timer_id_)
+	self.heartbeat_timer_id_ = -1
+end
+
+-- ##############接收协议部分开始##############
+function networkManager:handle(responseId, buffer)
+	if responseId == ResponseId.RC then 
+		-- 回调成功的方法
+		local data = protobuf.decode("proto_structs.RpRC", buffer, #buffer)
+		dump(data)
+		if self.success_callbacks_[data.seqNum] ~= nil then 
+			self.success_callbacks_[data.seqNum]()
+		end  
+
+		self:ClearCallBacks(data.seqNum)
+		self:ClearTimeoutCounter(data.seqNum)
+		-- mask
+		for i, v in ipairs(self.mask_quest) do
+			if v == data.seqNum then
+				table.remove(self.mask_quest, i)
+				break
+			end 
+		end
+		if #self.mask_quest == 0 then 
+			layoutManager:Instance():SetNetWorkMaskState(false)
+		end 
+	else
+		-- 跳转到回调的方法
+		if self.handlers[responseId] then
+			self.handlers[responseId](self, buffer)
+		end
+	end
+end
+-- ##############接收协议部分结束##############
+
+-- ##############发送协议部分开始##############
+function networkManager:SendProto(id, seqNum, protoName, data, showMask, successCallBack, failCallBack)
+	-- 输出发送体数据
+	dump(data)
+	local onSendOk = function ( )
+		print("onSendOk")
+
+		-- 回调方法收集
+		if successCallBack ~= nil then 
+			self.success_callbacks_[seqNum] = successCallBack
+		end 
+		if failCallBack ~= nil then 
+			self.fail_callbacks_[seqNum] = failCallBack
+		end
+	end
+	self.timeout_counter_[seqNum] = 0
+	-- 发送
+	local _object = protobuf.encode(protoName, data)
+	LuaNetWorkManager.SendProto(id, _object, onSendOk)
+	-- mask
+	if showMask then 
+		self.mask_quest[#self.mask_quest + 1] = seqNum
+		layoutManager:Instance():SetNetWorkMaskState(true)
+	end 
+end
+-- 创建一个requestData
+function networkManager.CreteRequestData( )
+	local requestData = {
+		rqData = {
+			seqNum = networkManager:Instance():GetSeqNum()
+		},
+	};
+	return requestData;
+end
+-- 创建空的发送体，就是rqdata
+function networkManager.CreteEmptyRequestData( )
+	local requestData = {
+		seqNum = networkManager:Instance():GetSeqNum()
+	}
+	return requestData
+end
+-- ##############接收协议部分结束##############
+
+-- 向后端发送 heartbeat
+function networkManager:NetWorkHeartBeat()
+	local rq = networkManager:Instance():CreteEmptyRequestData()
+    networkManager:Instance():SendProto(RequestId.H_POST_HEART_BEAT, rq.seqNum, "proto_structs.RqData", rq, false, nil, nil)
+end 
+
+--[[  测试向服务器发送消息
+function TestSendProto()
+	local seqnum = LuaNetWorkManager.GetRequestVOSeqNum()
+	local data = {
+		rqData = {
+			seqNum = seqnum
+		},
+		cityId = "58369f336ec1600077a9e306",
+		buildingId = "",
+		slot = 0,
+	} 
+	local successCallBack = function ( )
+		print("successCallBack")
+	end
+	local failCallBack = function ( )
+		print("failCallBack")
+	end
+	networkManager:Instance().SendProto(requestId.H_GATHER_RES_ALL, seqnum, "proto_structs.RqBuilding", data, true, successCallBack, failCallBack)
+end
+]]

@@ -1,0 +1,13 @@
+
+require("include")
+-- 目录结构用.表示
+require("game.gameMain")
+
+function main()
+	print("Lua Main")
+	gameMain:Instance():StartUp()
+end
+
+function mainUpdate(deltaTime)
+	gameMain:Instance():Update(deltaTime)
+end

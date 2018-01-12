@@ -1,0 +1,4 @@
+-- 从c# 发过来的事件处理
+function OnHandleEventFromCS(event, params)
+	csEventHandler:Instance():handle(event, params);
+end

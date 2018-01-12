@@ -1,0 +1,14 @@
+-- 登录数据管理
+loginDataManager = singletonClass("loginDataManager")
+
+function loginDataManager:ctor( )
+    self.server_ip = nil
+end
+
+function loginDataManager:SetServerIp( ip )
+    self.server_ip = ip
+end
+
+function loginDataManager:GetServerIp()
+    return self.server_ip
+end

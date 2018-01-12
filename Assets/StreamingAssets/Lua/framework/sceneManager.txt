@@ -1,0 +1,15 @@
+
+sceneManager = singletonClass("sceneManager")
+
+sceneManager.SceneId = {
+	scn_loading = "scn_loading",
+	scn_lobby = "scn_lobby",
+	scn_battle = "scn_battle",
+}
+
+function sceneManager:ctor()
+end 
+
+function sceneManager:SwitchScene(sceneId)
+    LuaEventManager.PostCSEvent("SwitchScene", sceneId) 
+end

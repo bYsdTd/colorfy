@@ -1,0 +1,45 @@
+local loginLayout = class("loginLayout", layout)
+
+-- 一些定义
+event_define.LoginLayout_SHOW = "LoginLayout_SHOW"
+
+function loginLayout:ctor( id )
+	loginLayout.super.ctor(self,id)	
+
+	self:addEvent({ name = event_define.LoginLayout_SHOW, eventHandler = loginLayout.super.Show})
+end	
+
+function loginLayout:OnInit(event)
+    -- 获得UI对象
+    local poplist_server = self:ChildTransform("Content/popServer"):GetComponent(UIPopupList) -- 写死的ip列表
+    local input_server = self:ChildTransform("Content/InputServer"):GetComponent(UIInput) -- 手输入ip列表
+    local btn_login = self:ChildGameObject("Content/BtnLogin") -- 登录按钮
+    
+    -- 绑定事件
+    UIEventListener.Get(btn_login).onClick = function()
+        print("btn_login click")
+        -- 设置列表
+        if input_server.value ~= "" then
+            loginDataManager:Instance():SetServerIp(input_server.value)
+        else
+            loginDataManager:Instance():SetServerIp(poplist_server.value)
+        end
+
+        self:Close()
+
+        statusLogin:Instance():EnterStage(statusLogin.Stage.Init, nil)
+    end
+end
+
+function loginLayout:OnShow(event)
+   
+end
+
+function loginLayout:OnHide(event)
+end
+
+function loginLayout:OnDestory()
+    -- body
+end
+
+return loginLayout

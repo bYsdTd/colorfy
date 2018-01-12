@@ -1,0 +1,62 @@
+utilsFunc = {}
+
+function utilsFunc.formatH2M2S2Trim(time, limit)
+	local result = "";
+	local len = 0;
+	local days = math.floor(time / 86400)
+	time = time % 86400
+	local hours = math.floor(time / 3600)
+	time = time % 3600
+	local minutes = math.floor(time / 60)
+	time = time % 60
+	local seconds = math.floor(time)
+
+	if days > 0 then
+		result = result .. days .. "D";
+		len = len + 1
+		if limit ~= nil and len >= limit then
+			return result;
+		end
+	end
+	if hours > 0 then
+		result = result .. hours .. "H";
+		len = len + 1
+		if limit ~= nil and len >= limit then
+			return result;
+		end
+	end
+	if minutes > 0 then
+		result = result .. minutes .. "M";
+		len = len + 1
+		if limit ~= nil and len >= limit then
+			return result;
+		end
+	end
+	result = result .. seconds .. "S";
+	return result;
+end
+
+function utilsFunc.formatH2M2S2Colon(time)
+	local result = "";
+	local hours = math.floor(time / 3600)
+	time = time % 3600
+	local minutes = math.floor(time / 60)
+	time = time % 60
+	local seconds = math.floor(time)
+
+	local hourPre = ""
+	local minutePre = ""
+	local secondPre = ""
+	if hours < 10 then
+		hourPre = "0"
+	end
+	if minutes < 10 then
+		minutePre = "0"
+	end
+	if seconds < 10 then
+		secondPre = "0"
+	end
+
+	result = hourPre .. hours .. ":" .. minutePre .. minutes .. ":" .. secondPre .. seconds;
+	return result;
+end

@@ -1,0 +1,3 @@
+ErrorId = { 
+	E_LOGIN = 1,
+}

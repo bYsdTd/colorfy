@@ -1,0 +1,36 @@
+-- global
+require("framework.functions")
+-- framework
+require("framework.eventManager")
+require("framework.resourceManager")
+require("framework.debugs")
+require("framework.ui.uilayout")
+require("framework.ui.layoutManager")
+require("framework.timerManager")
+require("framework.sceneManager")
+
+-- utils
+require("utils.utilsFunc")
+
+-- gds config
+require("config.uiConfig")
+require("config.dataConfig")
+
+-- event define
+require("event.event_global")
+require("event.eventFromCSCallback")
+require("event.csEventHandler")
+require("event.registerCSEventHandler")
+
+-- network
+require("network.networkManager")
+require("network.networkCallbackFunction")
+
+-- data
+require("data.loginDataManager")
+require("data.findBattleDataManager")
+
+-- utils
+json = require ("utils.dkjson")
+-- include("utils.uiItemPool")
+-- include("utils.ParticlesUtils")

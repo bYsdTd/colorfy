@@ -1,0 +1,24 @@
+csEventHandler = singletonClass("csEventHandler")
+
+function csEventHandler:ctor( )
+	print("csEventHandler ctor");
+	self:register();
+end
+
+function csEventHandler:destroy()
+	-- body
+end
+
+function csEventHandler:handle(event, param)
+	print(event)
+	if self.handlers[event] then
+		self.handlers[event](self, param);
+	end
+end
+
+function csEventHandler:doRegister(name, func)
+	if self.handlers[name] ~= nil then
+		print("WARNING--------Register a duplicated cs event:" .. name)
+	end
+	self.handlers[name] = func
+end

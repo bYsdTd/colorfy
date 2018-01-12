@@ -1,0 +1,14 @@
+require("event.handler.netWorkEventHandler")
+require("event.handler.lobbyEventHandler")
+
+function csEventHandler:register()
+	self.handlers = {}
+
+	self:doRegister("ConnectSuccess", self.OnConnectSuccessCEventHandler)
+	self:doRegister("ConnectFailed", self.OnConnectFailedCEventHandler)
+	self:doRegister("ConnectLost", self.OnConnectLostCEventHandler)
+	self:doRegister("ServerInfo", self.OnServerInfoCEventHandler)
+	self:doRegister("CloseAllLuaLayout", self.OnCloseAllLayoutEventHandler)
+	self:doRegister("OpenLuaLayout", self.OnOpenLayoutEventHandler)
+	self:doRegister("UpdateBattleLoading", self.OnUpdateBattleLoadingEventHandler)
+end

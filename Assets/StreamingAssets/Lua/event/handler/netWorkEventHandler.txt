@@ -1,0 +1,14 @@
+-- 连接成功的回调
+function csEventHandler:OnConnectSuccessCEventHandler(...)
+    eventManager.postEvent({name = "ConnectSuccess"})
+end
+
+-- 连接失败的回调
+function csEventHandler:OnConnectFailedCEventHandler(...)
+    eventManager.postEvent({name = "ConnectFailed"})
+end
+
+-- 丢失连接的回调
+function csEventHandler:OnConnectLostCEventHandler(...)
+    eventManager.postEvent({name = "ConnectLost"})
+end

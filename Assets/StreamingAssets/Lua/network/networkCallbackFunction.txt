@@ -1,0 +1,3 @@
+function OnProtobufCallBack( responseId, buffer )
+	networkManager:Instance():handle(responseId, buffer:ReadString())
+end

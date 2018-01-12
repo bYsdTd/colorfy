@@ -1,0 +1,8 @@
+-- 加入匹配队列成功
+function networkManager:Rp_MATCHING_ROOM_INFO(buffer)
+	local data = protobuf.decode("proto_structs.RpMatchingRoomInfo", buffer, #buffer)
+
+	dump(data)
+
+	findBattleDataManager:Instance():UpdateMatchingRoomInfo(data)
+end

@@ -1,0 +1,101 @@
+-- 定时器类
+local Timer = class("Timer")
+
+function Timer:ctor( )
+	self.interval_ = 0  -- 调用间隔
+	self.trigger_times_ = 0 -- 触发次数
+	self.tick_func = nil -- 调用的方法
+	self.tick_func_owner = nil -- 该方法的所有者
+
+	self.delete_flag_ = false -- 应该干掉的标记
+
+	self.next_tick_time = 0 -- 下次应该被 执行 的时间
+end
+
+function Timer:Tick(timeNow, deltaTime)
+	if not self.delete_flag_ and timeNow > self.next_tick_time then 
+		if self.trigger_times_ == 1 then 
+			self.delete_flag_ = true
+		else 
+			self.trigger_times_ = self.trigger_times_ - 1
+			self.next_tick_time = self.next_tick_time + self.interval_
+		end 
+
+		self.tick_func(self.tick_func_owner, deltaTime)
+	end 
+	return self.delete_flag_
+end
+
+-- 定时器管理器
+timerManager = singletonClass("timerManager")
+
+function timerManager:ctor()
+	self.time_scene_tick_ = 0 -- 自从开始Tick到现在的时间
+	self.timer_id_ = 0 -- 永远指向下一个待创建的Timer
+	self.timers_ = {}  -- 保存所有的定时器
+end 
+
+-- 延时多久之后调用
+-- 参数 delayTime 延时时间
+-- 参数 triggerTimes 触发多少次，为0代表没有限制
+function timerManager:DelayCallFunc(tickFuncOwner, tickFunc, delayTime, triggerTimes)
+	triggerTimes = triggerTimes or 0
+	return self:StartTimer(tickFuncOwner, tickFunc, 0, delayTime, 1)
+end
+
+-- 重复调用
+-- 参数 interval 调用的间隔，为0表示每帧调用
+-- 参数 triggerTimes 触发多少次
+function timerManager:RepeatCallFunc(tickFuncOwner, tickFunc, interval, triggerTimes)
+	triggerTimes = triggerTimes or 0
+	return self:StartTimer(tickFuncOwner, tickFunc, interval, 0, triggerTimes)
+end
+
+-- 内部方法，不可外部调用
+-- interval 和 delayTime ，优先使用不为0的数值作为间隔，两个值都应该非负,若同时不为0，使用interval
+function timerManager:StartTimer(tickFuncOwner, tickFunc, interval, delayTime, triggerTimes)
+	local timer = Timer:new()
+	timer.tick_func_owner = tickFuncOwner
+	timer.tick_func = tickFunc
+	timer.trigger_times_ = triggerTimes
+	if interval > 0 then 
+		timer.interval_ = interval
+	elseif delayTime > 0 then
+		timer.interval_ = delayTime
+	end 
+
+	timer.next_tick_time = self.time_scene_tick_ + interval
+
+	self.timers_[self.timer_id_] = timer
+
+	self.timer_id_ = self.timer_id_ + 1
+
+	return self.timer_id_ - 1
+end
+
+-- 主循环调用的方法
+function timerManager:Tick(deltaTime)
+	self.time_scene_tick_ = self.time_scene_tick_ + deltaTime
+
+	local needRemove = {}
+	for k, v in pairs(self.timers_) do
+		if v.delete_flag_ then 
+			needRemove[#needRemove + 1] = k
+		elseif v:Tick(self.time_scene_tick_, deltaTime) then
+			needRemove[#needRemove + 1] = k
+		end 
+	end
+	for i,v in ipairs(needRemove) do
+		self.timers_[v] = nil
+	end
+end
+
+-- 销毁某定时器
+function timerManager:DestoryTimer(timerId)
+	self.timers_[timerId] = nil
+end
+
+-- 清理所有的定时器
+function timerManager:Dispose()
+	self.timers_ = {}
+end

@@ -1,0 +1,5 @@
+ResponseId = { 
+	RC                                    = 1,
+	ERROR                                 = 2,
+  MATCHING_ROOM_INFO = 30,
+}

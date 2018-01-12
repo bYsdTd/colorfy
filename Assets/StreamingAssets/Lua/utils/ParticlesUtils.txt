@@ -1,0 +1,23 @@
+ParticlesUtils = {}
+
+-- 例子系统设置大小
+function ParticlesUtils.setParticalScale(transform, scale)
+	local particles = transform:GetComponentsInChildren(UnityEngine.ParticleSystem);
+	for i=1,#particles do
+		local particle = particles[i];
+		particle.startSize = particle.startSize * scale;
+		local particleRender = particle:GetComponent(UnityEngine.ParticleSystemRenderer);
+		if nil ~= particleRender then
+			particleRender.lengthScale = particleRender.lengthScale * scale;
+			particleRender.velocityScale = particleRender.velocityScale * scale;
+		end
+	end
+end
+
+function ParticlesUtils.setParticalColor(transform, color )
+	local particles = transform:GetComponentsInChildren(UnityEngine.ParticleSystem);
+	for i=1,#particles do
+		local particle = particles[i];
+		particle.startColor = color;
+	end
+end

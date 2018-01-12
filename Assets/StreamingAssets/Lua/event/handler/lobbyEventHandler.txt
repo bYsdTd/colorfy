@@ -1,0 +1,18 @@
+
+-- 关闭 Lua 所有的界面
+function csEventHandler:OnCloseAllLayoutEventHandler( ... )
+    layoutManager:Instance():CloseAllView()
+end
+
+-- 打开指定的界面
+function csEventHandler:OnOpenLayoutEventHandler( ... )
+    local arg = ...
+    eventManager.postEvent({name = arg[1], nil})
+end
+
+-- 战斗界面加载进度
+function csEventHandler:OnUpdateBattleLoadingEventHandler( ... )
+    print("OnUpdateBattleLoadingEventHandler")
+    local arg = ...
+    eventManager.postEvent({name = event_define.UpdateBattleLoading, progress = arg[1]})
+end

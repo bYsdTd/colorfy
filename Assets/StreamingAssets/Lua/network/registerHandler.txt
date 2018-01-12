@@ -1,0 +1,7 @@
+require("network.handlers.lobbyHandlers")
+
+function networkManager:registerHandler( )
+    self.handlers = {}
+
+    self.handlers[ResponseId.MATCHING_ROOM_INFO] = self.Rp_MATCHING_ROOM_INFO
+end

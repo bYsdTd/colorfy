@@ -1,0 +1,158 @@
+layout = class("layout")
+
+function layout:ctor( id )
+	assert(uiConfig[id] ~= nil, "layout:ctor() - invalid id "..id)
+	
+	self._config = uiConfig[id];
+	-- root panel
+	self._view = nil
+	-- isloaded
+	self._loaded = false
+	-- is show
+	self._show = false
+	-- event list
+	self._event = {}
+end	
+ 
+function layout:isLoaded()
+	return self._loaded
+end
+
+function layout:Load(event)	
+	if(self._loaded) then  
+		return 
+	end
+
+	local eventData = event;
+
+	resourceManager:Instance().load(self._config.prefab, true,
+		-- 加载成功
+		function(asset)
+			assert(asset)
+
+			self._view = asset
+
+			if self._view == nil then
+				print("layout load UnityEngine.GameObject.Instantiate(asset) false!") 	
+				return
+			end
+
+			self._loaded = true
+
+			local result = layoutManager:Instance():showView(self._view)
+			if not result then
+				print("layoutManager showView false!")
+				self:Unload()
+				return
+			end
+
+			self._show = true
+
+			self:OnInit(eventData)
+			self:OnShow(eventData)
+		end, 
+		-- 加载失败
+		function()
+			assert(self._view ~= nil, "layout:preLoad() - invalid ui prefab "..self._config.prefab)
+		end
+	);
+end	
+
+function layout:Unload()
+    if(self._loaded and self._view ~= nil) then
+		layoutManager:Instance():Unload(self)
+		self._view = nil;
+    end
+
+    self._loaded = false;
+end
+
+function layout:addEvent(event)
+    self._event[event.name] = event;
+    eventManager.addEventLister(event.name,self.onEvent,self);
+end
+
+function layout:removeEvent( eventName )
+	self._event[eventName] = nil;
+	eventManager.removeEvent(eventName, self.onEvent);
+end
+
+function layout:GetEvent()
+	 return self._event
+end
+
+function layout:onEvent(event)
+    if(nil == self._event[event.name]) then
+    	print("layout %s:onEvent event.name %s not find", self._config.name, event.name)
+    end
+
+    local eventHandler = self._event[event.name].eventHandler;
+
+    if(eventHandler) then
+    	eventHandler(self, event);
+    end
+end
+
+function layout:isShow()
+	return self._show
+end
+
+function layout:Show(event)
+	if(self._show) then
+		self._view:SetActive(true)
+		self:OnShow(event)
+		return
+	end
+ 
+	self:Load(event)
+end
+
+function layout:Hide(event)
+	self:OnHide(event)
+	self._view:SetActive(false)
+end
+
+--/###### 每个layout应该重载的方法开始 ######\
+-- 每次load调用，不会重复调用
+function layout:OnInit(event)
+	-- body
+end
+
+-- 每次show会触发
+function layout:OnShow(event)
+	-- body
+end
+
+-- 每次Hide的时候调用
+function layout:OnHide( )
+	-- body
+end
+
+-- 每次unload(销毁的时候调用)
+function layout:OnDestory( )
+	-- body
+end
+--\###### 每个layout应该重载的方法结束 ######/
+
+function layout:Close()
+	if(self._show)then
+	    self._show = false
+	    self:OnDestory()
+	    self:Unload()
+	end
+end	
+
+-- 获得子节点的transform
+function layout:ChildTransform(name)
+	if(self._view == nil )then  
+		return  nil
+	end
+	local transform = self._view.transform:Find(name)
+	assert(transform ~= nil, "layout child not find: " .. name)
+	return  transform
+end	
+
+-- 获得子节点的gameobject
+function layout:ChildGameObject(name)
+	return self:ChildTransform(name).gameObject
+end	

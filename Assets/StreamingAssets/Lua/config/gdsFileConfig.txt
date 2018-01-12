@@ -1,0 +1,6 @@
+-- 该文件是配置所有项目中使用到的proto，初始化的时候根据这个来进行初始化
+local gdsFileConfig = {
+    ["chat_expression"] = "GDS/chat_expression.csv",
+}
+
+return gdsFileConfig

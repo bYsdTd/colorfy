@@ -1,0 +1,48 @@
+-- UI管理
+layoutManager = singletonClass("layoutManager")
+
+function layoutManager:ctor( )
+	self.views = {}
+	self.NGUIRoot = nil
+	self.network_mask = nil  -- 网络延迟的时候的蒙版
+	self.deactiveCameraWhenFullScreen = true
+	-- 初始化
+	self.NGUIRoot = UnityEngine.GameObject.Find("UIRoot/UIContainer")
+	self.network_mask = UnityEngine.GameObject.Find("UIRoot/UIContainer/NetworkMask")
+
+	for k,v in pairs(uiConfig) do
+	    -- print("load layout -- :  "..v.name.." script: "..v.script)
+		local ui  = require(v.script).new(k)
+		self.views[v.name] = ui
+	end
+end
+
+function layoutManager:showView(view)
+	if self.NGUIRoot == nil then
+		return false
+	end
+	local transform = view.transform
+	transform:SetParent(self.NGUIRoot.transform, false)
+	transform.localScale = UnityEngine.Vector3.one
+	return true
+end
+
+function layoutManager:getLayout(name)
+	return self.views[name]
+end
+
+function layoutManager:Unload(ui)
+	resourceManager:Instance().unload(ui._config.prefab, ui._view, true)
+end
+
+function layoutManager:CloseAllView ()
+	for k,v in pairs (self.views) do
+		if v ~= nil and v._view ~= nil and v._show then
+			v:Close()
+		end
+	end
+end
+
+function layoutManager:SetNetWorkMaskState(state)
+	self.network_mask:SetActive(state)
+end

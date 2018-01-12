@@ -1,0 +1,12 @@
+function networkManager:registerPb( )
+    self:registerProto("rp_data.pb")
+    self:registerProto("errors.pb")
+    self:registerProto("request.pb")
+    self:registerProto("rq_data.pb")
+    self:registerProto("response.pb")
+    self:registerProto("common.pb")
+    self:registerProto("rq_login.pb")
+    self:registerProto("rp_matching_room_info.pb")
+    self:registerProto("rp_error.pb")
+    self:registerProto("rp_rc.pb")
+end

@@ -1,0 +1,55 @@
+uiItemPool = class("uiItemPool")
+
+local GameObject = UnityEngine.GameObject
+local Vector3 = UnityEngine.Vector3
+
+function uiItemPool:Init(transRoot, goPrefab)
+	self.root = transRoot
+	self.prefab = goPrefab
+	self.tempRoot = GameObject().transform
+	self.tempRoot.parent = transRoot.parent
+	self.tempRoot.localScale = Vector3.one
+	self.tempRoot.name = "__TempRoot"
+	self.objectList = {}
+end
+
+function uiItemPool:Get()
+	local isNew = false;
+	local go
+	if self.tempRoot.childCount > 0 then
+		go = self.tempRoot:GetChild(0).gameObject
+	else
+		go = GameObject.Instantiate(self.prefab)
+		isNew = true;
+	end
+	go.transform.parent = self.root
+	go.transform.localScale = Vector3.one
+	go.transform.localPosition = Vector3.zero
+	go:SetActive(true)
+	table.insert(self.objectList, go)
+	return go, isNew;
+end
+
+function uiItemPool:Clear()
+	for i = 1, #self.objectList do
+		local child = self.objectList[i]
+		child.transform.parent = self.tempRoot
+		child:SetActive(false)
+	end
+	self.objectList = {}
+end
+
+function uiItemPool:Dispose()
+	for i = 1, #self.objectList do
+		GameObject.Destroy(self.objectList[i])
+	end
+end
+
+function uiItemPool:GetCount()
+	return #self.objectList
+end
+
+function uiItemPool:GetObject(index)
+	return self.objectList[index]
+end
+
