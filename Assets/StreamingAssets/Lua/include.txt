@@ -14,7 +14,6 @@ require("utils.utilsFunc")
 
 -- gds config
 require("config.uiConfig")
-require("config.dataConfig")
 
 -- event define
 require("event.event_global")
@@ -26,11 +25,3 @@ require("event.registerCSEventHandler")
 require("network.networkManager")
 require("network.networkCallbackFunction")
 
--- data
-require("data.loginDataManager")
-require("data.findBattleDataManager")
-
--- utils
-json = require ("utils.dkjson")
--- include("utils.uiItemPool")
--- include("utils.ParticlesUtils")

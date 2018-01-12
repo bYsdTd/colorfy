@@ -14,6 +14,8 @@ public static class App
 
 		SoundManager.Instance ().Init ();
 
+		LuaGameManager.Instance().InitAllManager();
+		
 		inited = true;
 	}
 

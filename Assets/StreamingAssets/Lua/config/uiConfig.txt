@@ -3,28 +3,7 @@ uiConfig = {
 		['id'] = 1,
 		['name'] = 'loginLayout',
 		['prefab'] = 'LoginLayout',
-		['script'] = 'ui.lobby.loginLayout',
+		['script'] = 'ui.loginLayout',
 		['depth'] = 100
 	},
-	{   -- 大厅界面
-		['id'] = 2,
-		['name'] = 'lobbyLayout',
-		['prefab'] = 'LobbyLayout',
-		['script'] = 'ui.lobby.lobbyLayout',
-		['depth'] = 100
-	},
-	{   -- 匹配界面
-		['id'] = 3,
-		['name'] = 'findBattleLayout',
-		['prefab'] = 'FindBattleLayout',
-		['script'] = 'ui.lobby.findBattleLayout',
-		['depth'] = 150
-	},
-	{   -- 战斗加载界面
-		['id'] = 4,
-		['name'] = 'battleLoadingLayout',
-		['prefab'] = 'BattleLoadingLayout',
-		['script'] = 'ui.battle.battleLoadingLayout',
-		['depth'] = 10000
-	}
 }

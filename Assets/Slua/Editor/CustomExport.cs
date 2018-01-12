@@ -43,15 +43,15 @@ namespace SLua
 //            add(typeof(Dictionary<int, string>), "DictIntStr");
 //            add(typeof(string), "String");
             
-			// add (typeof(LuaResMananger), "LuaResMananger");
-			// add (typeof(LuaUtils), "LuaUtils");
-			// add (typeof(LuaEventManager), "LuaEventManager");
-			// add (typeof(LuaNetWorkManager), "LuaNetWorkManager");
-			// add (typeof(UIEventListener), "UIEventListener");
-			// add (typeof(UIPopupList), "UIPopupList");
-			// add (typeof(UIInput), "UIInput");
-			// add (typeof(UIProgressBar), "UIProgressBar");
-			// add (typeof(UILabel), "UILabel");
+			add (typeof(LuaResMananger), "LuaResMananger");
+			add (typeof(LuaUtils), "LuaUtils");
+			add (typeof(LuaEventManager), "LuaEventManager");
+			add (typeof(LuaNetWorkManager), "LuaNetWorkManager");
+			add (typeof(UIEventListener), "UIEventListener");
+			add (typeof(UIPopupList), "UIPopupList");
+			add (typeof(UIInput), "UIInput");
+			add (typeof(UIProgressBar), "UIProgressBar");
+			add (typeof(UILabel), "UILabel");
 
             // add your custom class here
             // add( type, typename)

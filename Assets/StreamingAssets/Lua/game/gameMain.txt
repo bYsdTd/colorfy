@@ -1,20 +1,15 @@
-require("game.statusLogin")
-local gdsFileConfig = require("config.gdsFileConfig")
-
 gameMain = singletonClass("gameMain")
 
 function gameMain:ctor()
 end 
 
 function gameMain:StartUp( )
-	self:InitManager( )
 
-	self:LoadResource()
+	self:InitManager()
+
 	-- 开始登陆流程
 	eventManager.postEvent({name = event_define.LoginLayout_SHOW})
-
-	-- 暂时直接进大厅
-	-- eventManager.postEvent({name = event_define.LobbyLayout_SHOW})
+	
 end
 
 function gameMain:Update(deltaTime)
@@ -31,22 +26,4 @@ function gameMain:InitManager( )
 	layoutManager:Instance()
 	-- 场景管理器
 	sceneManager:Instance()
-end
-
-function gameMain:LoadResource()
-	self:LoadGDS()
-end 
-
--- 加载GDS
-function gameMain:LoadGDS()
-	-- 开始读取文件
-	for k, v in pairs(gdsFileConfig) do
-		dataConfig.gdsInitCallback(k, LuaUtils.ReadFileAsString(v)) 
-	end
-end
-
-function gameMain:LoginCompleteAndPlayGame( )
-	print("开始正常的玩耍")
-	eventManager.postEvent({name = event_define.LobbyLayout_SHOW, nil})
-	-- sceneManager:Instance():SwitchScene(sceneManager.SceneId.scn_lobby)
 end
