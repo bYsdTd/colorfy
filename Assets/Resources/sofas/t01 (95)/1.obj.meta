@@ -13,7 +13,12 @@ ModelImporter:
     2300000: wood
     3300000: wood
     4300000: wood
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: woodMat
+    second: {fileID: 2100000, guid: 2ee8ffc5747937943ba8b24059ac4f58, type: 2}
   materials:
     importMaterials: 1
     materialName: 0

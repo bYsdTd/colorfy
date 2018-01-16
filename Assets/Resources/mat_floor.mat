@@ -66,7 +66,7 @@ Material:
     - _Mode: 1
     - _OcclusionStrength: 1
     - _Parallax: 0.02
-    - _ShadowInt: 0.938
+    - _ShadowInt: 0.881
     - _ShadowIntensity: 0.6
     - _Shininess: 0.078125
     - _SmoothnessTextureChannel: 0
@@ -75,6 +75,6 @@ Material:
     - _UVSec: 0
     - _ZWrite: 1
     m_Colors:
-    - _Color: {r: 0.014705896, g: 0.014705896, b: 0.014705896, a: 1}
+    - _Color: {r: 0.2352941, g: 0.2352941, b: 0.2352941, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _SpecColor: {r: 0.5, g: 0.5, b: 0.5, a: 0}
